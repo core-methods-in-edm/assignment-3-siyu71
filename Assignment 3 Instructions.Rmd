@@ -21,7 +21,8 @@ library(ggplot2)
 Now, upload the file "Class_Motivation.csv" from the Assignment 3 Repository as a data frame called "K1""
 ```{r}
 
-K1 <- read.table(...)
+K1 <- read.csv("~/assignment-3-siyu71/Class_Motivation.csv")
+K1 <- as.data.frame(K1)
 
 ```
 
@@ -39,6 +40,8 @@ K2 <- dplyr::select(K1, 2:6)
 
 It is important to think about the meaning of missing values when clustering. We could treat them as having meaning or we could remove those people who have them. Neither option is ideal. What problems do you foresee if we recode or remove these values? Write your answers below:
 
+recoding: these missing values may not have meaning at all and should be deleted
+removing: losing data
 
 
 We will remove people with missing values for this assignment, but keep in mind the issues that you have identified.
