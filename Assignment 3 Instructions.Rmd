@@ -220,7 +220,11 @@ fit_LL <- kmeans(LL, 2)
 LL1 <- data.frame(LL, fit_LL$cluster)
 names(LL1) <- c("lon", "lat", "cluster")
 LL_count <- dplyr::count(LL1, cluster)
-
+C6_n <- C6[,-2]
+LL_p <- data.frame(C6_n, fit_LL$cluster)
+names(LL_p) <- c("question", "avg", "cluster")
+LL_p$cluster <- as.factor(LL_p$cluster)
+ggplot(LL_p, aes(question, avg, colour = cluster)) + geom_line() + xlab("question") + ylab("Answer")
 ```
 
 
