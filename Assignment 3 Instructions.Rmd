@@ -21,7 +21,8 @@ library(ggplot2)
 Now, upload the file "Class_Motivation.csv" from the Assignment 3 Repository as a data frame called "K1""
 ```{r}
 
-K1 <- read.table(...)
+K1 <- read.csv("~/assignment-3-siyu71/Class_Motivation.csv")
+K1 <- as.data.frame(K1)
 
 ```
 
@@ -39,6 +40,8 @@ K2 <- dplyr::select(K1, 2:6)
 
 It is important to think about the meaning of missing values when clustering. We could treat them as having meaning or we could remove those people who have them. Neither option is ideal. What problems do you foresee if we recode or remove these values? Write your answers below:
 
+recoding: these missing values may not have meaning at all and should be deleted
+removing: losing data
 
 
 We will remove people with missing values for this assignment, but keep in mind the issues that you have identified.
@@ -153,12 +156,81 @@ K7 <- dplyr::count(K4, cluster)
 
 Look at the number of people in each cluster, now repeat this process for 3 rather than 2 clusters. Which cluster grouping do you think is more informative? Write your answer below:
 
+I think the two group clustering is more informative. Because the three group clustering seems to just devide one big group into two smaller groups with only 3 in one and 4 in the other. I think this is too much. 
+
+```{r}
+fit1 <- kmeans(K3, 3) 
+K4_1 <- data.frame(K3, fit1$cluster)
+names(K4_1) <- c("1", "2", "3", "4", "5", "cluster")
+K5_1 <- tidyr::gather(K4_1, "week", "motivation", 1:5)
+K6_1 <- K5_1 %>% group_by(week, cluster)
+K6_1 <- summarise(K6_1, avg = mean(motivation))
+K6_1$week <- as.numeric(K6_1$week)
+K6_1$cluster <- as.factor(K6_1$cluster)
+ggplot(K6_1, aes(week, avg, colour = cluster)) + geom_line() + xlab("Week") + ylab("Average Motivation")
+K7_1 <- dplyr::count(K4_1, cluster)
+```
+
 
 Once you have done this, save both of your plots to the Assignment 5 file. Create a Zotero item to index your new computer program (Assignment 5.rmd) in Zotero. Then commit your assignment, push it to your Github account and then Pull request your version to the original assignment version so I can see it.
 
 ##Part II
 
 Now, try to do the same for the data [collected in class](https://tccolumbia.qualtrics.com/SE/?SID=SV_6RRqlSAM6lZWYQt). Create two groups of clusters, the answers to the questions and regions where people grew up. 
+
+```{r}
+C1 <- as.data.frame(cluster_class_data)
+C2 <- dplyr::select(C1, 4:13)
+C3 <- na.omit(C2)
+
+install.packages("dummies")
+library(dummies)
+
+C3 <- dummy.data.frame(C3)
+C3 <- C3[,-1]
+C3 <- C3[,-2]
+C3 <- scale(C3)
+
+fit_q2 <- kmeans(C3, 2) 
+C4 <- data.frame(C3, fit_q2$cluster)
+names(C4) <- c("3", "4", "5", "7", "8", "9", "10", "11", "12", "13", "cluster")
+C5 <- tidyr::gather(C4, "question", "answer", 1:10)
+
+C6 <- C5 %>% group_by(question, cluster)
+C6 <- summarise(C6, avg = mean(answer))
+C6$question <- as.numeric(C6$question)
+C6$cluster <- as.factor(C6$cluster)
+ggplot(C6, aes(question, avg, colour = cluster)) + geom_line() + xlab("question") + ylab("Answer")
+C7 <- dplyr::count(C4, cluster)
+```
+
+```{r}
+install.packages('maps')
+install.packages('ggmap')
+library(maps)
+library(ggmap)
+C2_1 <- dplyr::select(C1, 14:16)
+C3_1 <- na.omit(C2_1)
+names(C3_1) <- c("city","province","country")
+LL <- geocode(C3_1$city, output = "latlon")
+C3_1 <- cbind(C3_1, LL)
+LL <- na.omit(LL)
+C3_1 <- na.omit(C3_1)
+fit_LL <- kmeans(LL, 2) 
+LL1 <- data.frame(LL, fit_LL$cluster)
+names(LL1) <- c("lon", "lat", "cluster")
+LL_count <- dplyr::count(LL1, cluster)
+C6_n <- C6[,-2]
+LL_p <- data.frame(C6_n, fit_LL$cluster)
+names(LL_p) <- c("question", "avg", "cluster")
+LL_p$cluster <- as.factor(LL_p$cluster)
+ggplot(LL_p, aes(question, avg, colour = cluster)) + geom_line() + xlab("question") + ylab("Answer")
+```
+
+
+
+```
+
 
 ##Part III
 
